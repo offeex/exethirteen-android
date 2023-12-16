@@ -1,0 +1,9 @@
+[versions]
+kotlin = "1.8.10"
+android = "8.1.4"
+lifecycle = "2.6.2"
+
+[libraries]
+androidPlugin = { module = "com.android.tools.build:gradle", version.ref = "android" }
+kotlinPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+lifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
