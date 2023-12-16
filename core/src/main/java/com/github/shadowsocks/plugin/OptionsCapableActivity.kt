@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2020 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2020 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,20 +18,33 @@
  *                                                                             *
  *******************************************************************************/
 
-@file:JvmName("Utils")
-
 package com.github.shadowsocks.plugin
 
-import android.os.Parcelable
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
-import kotlinx.parcelize.Parcelize
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
-@Parcelize
-class Empty : Parcelable
+/**
+ * Activity that's capable of getting EXTRA_OPTIONS input.
+ */
+abstract class OptionsCapableActivity : AppCompatActivity() {
+    protected fun pluginOptions(intent: Intent = this.intent) = try {
+        PluginOptions("", intent.getStringExtra(PluginContract.EXTRA_OPTIONS))
+    } catch (exc: IllegalArgumentException) {
+        Toast.makeText(this, exc.message, Toast.LENGTH_SHORT).show()
+        PluginOptions()
+    }
 
-@JvmOverloads
-@Deprecated("Moved to fragment package", ReplaceWith("fragment.showAllowingStateLoss"))
-fun DialogFragment.showAllowingStateLoss(fragmentManager: FragmentManager, tag: String? = null) {
-    if (!fragmentManager.isStateSaved) show(fragmentManager, tag)
+    /**
+     * Populate args to your user interface.
+     *
+     * @param options PluginOptions parsed.
+     */
+    protected abstract fun onInitializePluginOptions(options: PluginOptions = pluginOptions())
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        if (savedInstanceState == null) onInitializePluginOptions()
+    }
 }

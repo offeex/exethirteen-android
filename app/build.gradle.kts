@@ -11,7 +11,7 @@ android {
     defaultConfig {
         versionCode = 1
         versionName = "1.0"
-        targetSdk = 33
+        targetSdk = 34
         applicationId = "me.offeex.exethirteen"
         vectorDrawables {
             useSupportLibrary = true

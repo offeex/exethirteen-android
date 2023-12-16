@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.*
+import com.android.build.gradle.BaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 
@@ -10,7 +11,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 }
 
 fun CommonExtension<*, *, *, *, *>.setupCore() {
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         minSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

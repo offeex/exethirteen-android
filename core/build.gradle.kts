@@ -13,6 +13,7 @@ android {
 
     namespace = "com.github.shadowsocks.core"
     defaultConfig {
+        targetSdk = 34
         consumerProguardFiles("proguard-rules.pro")
 
         externalNativeBuild.ndkBuild {
@@ -95,7 +96,6 @@ dependencies {
     val roomVersion = "2.5.0"
     val workVersion = "2.7.1"
 
-    api(project(":plugin"))
     api("androidx.core:core-ktx:1.9.0")
     api("com.google.android.material:material:1.8.0")
 

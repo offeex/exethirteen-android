@@ -80,7 +80,8 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         return@let true
                     } catch (e: IOException) {
                         when ((e.cause as? ErrnoException)?.errno) {
-                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
+                            OsConstants.EPERM, OsConstants.EACCES -> Timber.d(e)
+//                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
                             else -> Timber.w(e)
                         }
                         return@let false
