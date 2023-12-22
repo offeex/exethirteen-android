@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -36,6 +38,7 @@
             android:directBootAware="true"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
@@ -93,10 +96,6 @@
 
         <activity android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"/>
         <activity android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"/>
-        <service android:name="com.google.firebase.components.ComponentDiscoveryService"
-                 android:directBootAware="true"/>
-        <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
-                  tools:node="remove"/>
         <service android:name="androidx.room.MultiInstanceInvalidationService"
                  android:process=":bg"/>
     </application>

@@ -10,11 +10,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.offeex.exethirteen.R
+import timber.log.Timber
+import kotlin.math.roundToInt
 
 @Composable
-internal fun BandwidthComposite(direction: BandwidthDirection, value: Int) {
+internal fun BandwidthComposite(direction: BandwidthDirection, value: String) {
+    val valueArr = value.split(" ")
+    val speed = valueArr[0].substringBefore(".")
+    val unit = try {
+        valueArr[1].uppercase()
+    } catch (e: IndexOutOfBoundsException) {
+        ""
+    }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painter = painterResource(id = direction.icon),
@@ -30,15 +41,20 @@ internal fun BandwidthComposite(direction: BandwidthDirection, value: Int) {
                 text = direction.name.lowercase().replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.bodyMedium
             )
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .width(0.dp)
+                    .wrapContentWidth(Alignment.Start, true)
+            ) {
                 Text(
-                    text = value.toString(),
+                    text = speed,
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.alignByBaseline()
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
-                    text = "MB/s",
+                    text = "$unit/s",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.alignByBaseline()
                 )

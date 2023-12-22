@@ -13,7 +13,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import me.offeex.exethirteen.entity.ServerChoice
+import me.offeex.exethirteen.manager.LatencyManager
+import me.offeex.exethirteen.model.ServerChoice
 import me.offeex.exethirteen.ui.theme.PrimaryColor
 import me.offeex.exethirteen.ui.theme.SecondaryColor
 
@@ -63,7 +64,7 @@ internal fun ServerChoiceComposite(
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             Text(
-                text = "77",
+                text = LatencyManager.latencies[choice].toString(),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.height(20.dp)
             )

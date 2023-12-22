@@ -2,10 +2,12 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("com.google.devtools.ksp") version "1.8.10-1.0.9"
+//    id("com.google.gms.google-services")
 }
 
 android {
     setupCore()
+    lint.disable += "RemoveWorkManagerInitializer"
 
     namespace = "me.offeex.exethirteen"
     defaultConfig {
@@ -22,9 +24,12 @@ android {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isPseudoLocalesEnabled = true
         }
     }
     kotlinOptions {
@@ -47,6 +52,9 @@ android {
 
 dependencies {
     implementation(project(":core"))
+
+    // useless shit
+    implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
 
     // compose-destinations
     implementation("io.github.raamcosta.compose-destinations:core:1.8.42-beta")

@@ -117,5 +117,5 @@ class HttpsTest : ViewModel() {
     }
 
     private val URLConnection.responseLength: Long
-        get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
+        get() = contentLengthLong
 }

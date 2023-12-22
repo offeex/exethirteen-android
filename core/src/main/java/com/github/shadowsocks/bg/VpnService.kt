@@ -114,9 +114,8 @@ class VpnService : BaseVpnService(), BaseService.Interface {
             field = value
             if (active) setUnderlyingNetworks(underlyingNetworks)
         }
-    private val underlyingNetworks get() =
-        // clearing underlyingNetworks makes Android 9 consider the network to be metered
-        if (Build.VERSION.SDK_INT == 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
+    // clearing underlyingNetworks makes Android 9 consider the network to be metered
+    private val underlyingNetworks get() = arrayOf(underlyingNetwork)
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
@@ -205,7 +204,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
         metered = profile.metered
         active = true   // possible race condition here?
         builder.setUnderlyingNetworks(underlyingNetworks)
-        if (Build.VERSION.SDK_INT >= 29) builder.setMetered(metered)
+        builder.setMetered(metered)
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn

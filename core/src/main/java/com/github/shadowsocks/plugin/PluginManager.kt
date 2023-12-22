@@ -144,9 +144,7 @@ object PluginManager {
 
     private fun initNative(configuration: PluginConfiguration): InitResult? {
         var flags = PackageManager.GET_META_DATA
-        if (Build.VERSION.SDK_INT >= 24) {
-            flags = flags or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
-        }
+        flags = flags or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
         val providers = app.packageManager.queryIntentContentProviders(
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)), flags)
                 .filter { it.providerInfo.exported }
@@ -158,8 +156,8 @@ object PluginManager {
         }
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
-        val isV2 = provider.applicationInfo.metaData?.getString(PluginContract.METADATA_KEY_VERSION)
-                ?.substringBefore('.')?.toIntOrNull() ?: 0 >= 2
+        val isV2 = (provider.applicationInfo.metaData?.getString(PluginContract.METADATA_KEY_VERSION)
+                ?.substringBefore('.')?.toIntOrNull() ?: 0) >= 2
         var failure: Throwable? = null
         try {
             initNativeFaster(provider)?.also { return InitResult(it, options, isV2) }

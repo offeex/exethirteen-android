@@ -37,12 +37,6 @@ import java.io.InputStream
 import kotlin.concurrent.thread
 
 class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : CoroutineScope {
-    companion object {
-        private val pid by lazy {
-            Class.forName("java.lang.ProcessManager\$ProcessImpl").getDeclaredField("pid").apply { isAccessible = true }
-        }
-    }
-
     private inner class Guard(private val cmd: List<String>) {
         private lateinit var process: Process
 
@@ -51,6 +45,13 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         } catch (_: IOException) { }    // ignore
 
         fun start() {
+//            fun File?.eblanishe() = this?.list()?.joinToString(" ")
+//            val libss = File(cmd[0])
+//            Timber.tag("GuardProcessPool").d("muha-cc parent: ${libss.parentFile.eblanishe()}")
+//            Timber.tag("GuardProcessPool").d("muha-cc parent 2: ${libss.parentFile?.parentFile.eblanishe()}")
+//            Timber.tag("GuardProcessPool").d("muha-cc parent 3: ${libss.parentFile?.parentFile?.parentFile.eblanishe()}")
+//            Timber.tag("GuardProcessPool").d("muha-cc parent 4: ${libss.parentFile?.parentFile?.parentFile?.parentFile.eblanishe()}")
+//            Timber.tag("GuardProcessPool").d("muha-galichina: ${cmd.joinToString(" || ")}")
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
         }
 
@@ -79,7 +80,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                     }
                     Timber.i("restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
-                    running = true
+//                    running = true
                     onRestartCallback?.invoke()
                 }
             } catch (e: IOException) {
@@ -87,21 +88,9 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
                 if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
-                    if (Build.VERSION.SDK_INT < 24) {
-                        try {
-                            Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
-                        } catch (e: ErrnoException) {
-                            if (e.errno != OsConstants.ESRCH) Timber.w(e)
-                        } catch (e: ReflectiveOperationException) {
-                            Timber.w(e)
-                        }
-                        if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
-                    }
                     process.destroy()                       // kill the process
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
-                        process.destroyForcibly()           // Force to kill the process if it's still alive
-                    }
+                    if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
+                    process.destroyForcibly()           // Force to kill the process if it's still alive
                     exitChannel.receive()
                 }                                           // otherwise process already exited, nothing to be done
             }

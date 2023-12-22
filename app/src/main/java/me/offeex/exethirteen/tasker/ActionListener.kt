@@ -18,38 +18,25 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package me.offeex.exethirteen.tasker
 
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import com.github.shadowsocks.Core.app
-import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.Core
+import com.github.shadowsocks.database.ProfileManager
 
-class BootReceiver : BroadcastReceiver() {
-    companion object {
-        private val componentName by lazy { ComponentName(app, BootReceiver::class.java) }
-        var enabled: Boolean
-            get() = app.packageManager.getComponentEnabledSetting(componentName) ==
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            set(value) = app.packageManager.setComponentEnabledSetting(componentName,
-                    if (value) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    else PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
-    }
-
+class ActionListener : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (!DataStore.persistAcrossReboot) {   // sanity check
-            enabled = false
-            return
+        val settings = Settings.fromIntent(intent)
+        var changed = false
+        if (ProfileManager.getProfile(settings.profileId) != null) {
+            Core.switchProfile(settings.profileId)
+            changed = true
         }
-        val doStart = when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> !DataStore.directBootAware
-            Intent.ACTION_LOCKED_BOOT_COMPLETED -> DataStore.directBootAware
-            else -> DataStore.directBootAware && Core.user.isUserUnlocked
-        }
-        if (doStart) Core.startService()
+        if (settings.switchOn) {
+            Core.startService()
+            if (changed) Core.reloadService()
+        } else Core.stopService()
     }
 }

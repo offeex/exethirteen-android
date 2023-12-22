@@ -20,24 +20,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.github.shadowsocks.bg.BaseService
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import me.offeex.exethirteen.R
-import me.offeex.exethirteen.entity.ServerChoice
+import me.offeex.exethirteen.model.ServerChoice
 import me.offeex.exethirteen.ui.screens.ScreenUtils.screen
 import me.offeex.exethirteen.ui.theme.PrimaryColor
 import me.offeex.exethirteen.ui.theme.SecondaryColor
 import me.offeex.exethirteen.ui.theme.TetriaryColor
+import me.offeex.exethirteen.manager.ConnectionManager
 
 @Composable
 @Destination
 @RootNavGraph(start = true)
 fun HomeScreen() {
-    var isConnected by remember { mutableStateOf(false) }
+    val isConnected = ConnectionManager.connected.value == BaseService.State.Connected
 
     Crossfade(targetState = isConnected, label = "", animationSpec = tween(700)) {
         Box(Modifier.screen(if (it) R.drawable.bgactive else R.drawable.bg)) {
-            ConnectButton(isConnected) { isConnected = !isConnected }
+            ConnectButton(isConnected) { ConnectionManager.toggle() }
             ConnectedStatus(isConnected)
             Row(
                 verticalAlignment = Alignment.Bottom,
@@ -45,9 +47,15 @@ fun HomeScreen() {
                     .padding(bottom = 190.dp)
                     .align(Alignment.BottomCenter)
             ) {
-                BandwidthComposite(direction = BandwidthDirection.DOWNLOAD, 64)
+                BandwidthComposite(
+                    direction = BandwidthDirection.DOWNLOAD,
+                    ConnectionManager.downRate
+                )
                 Spacer(modifier = Modifier.width(96.dp))
-                BandwidthComposite(direction = BandwidthDirection.UPLOAD, 57)
+                BandwidthComposite(
+                    direction = BandwidthDirection.UPLOAD,
+                    ConnectionManager.upRate
+                )
             }
             Column(Modifier.align(Alignment.BottomCenter)) {
                 var isCascaded by remember { mutableStateOf(false) }
@@ -56,30 +64,31 @@ fun HomeScreen() {
                     label = ""
                 )
                 if (isCascaded) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1.1f)
-                            .offset(y = 10.dp)
-                            .background(SecondaryColor.copy(alpha = fillerAlpha))
-                            .clickable(MutableInteractionSource(), null) {
-                                isCascaded = !isCascaded
-                            }
-                    )
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1.1f)
+                        .offset(y = 10.dp)
+                        .background(SecondaryColor.copy(alpha = fillerAlpha))
+                        .clickable(MutableInteractionSource(), null) {
+                            isCascaded = !isCascaded
+                        })
                 }
                 CascadeButton { isCascaded = !isCascaded }
-                var currentChoice by remember { mutableStateOf(ServerChoice.DE) }
+                val currentChoice = ConnectionManager.choice.value
                 LazyColumn(
                     modifier = Modifier
                         .background(PrimaryColor)
                         .animateContentSize()
                 ) {
                     if (isCascaded) {
-                        items(ServerChoice.values().toList()) {
+                        items(ServerChoice.values().toList()) { choice ->
                             val color =
-                                if (currentChoice == it) TetriaryColor
+                                if (currentChoice == choice) TetriaryColor
                                 else SecondaryColor
-                            ServerChoiceComposite(it, color) { currentChoice = it }
+                            ServerChoiceComposite(choice, color) {
+                                ConnectionManager.switchProfile(choice)
+                                ConnectionManager.reconnect()
+                            }
                             Spacer(modifier = Modifier.padding(top = 1.dp, bottom = 1.dp))
                         }
                     }

@@ -42,10 +42,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
@@ -233,7 +229,7 @@ object BaseService {
         val isVpnService get() = false
 
         suspend fun startProcesses() {
-            val context = if (Build.VERSION.SDK_INT < 24 || Core.user.isUserUnlocked) app else Core.deviceStorage
+            val context = if (Core.user.isUserUnlocked) app else Core.deviceStorage
             val configRoot = context.noBackupFilesDir
             val udpFallback = data.udpFallback
             data.proxy!!.start(this,
@@ -251,8 +247,7 @@ object BaseService {
 
         fun startRunner() {
             this as Context
-            if (Build.VERSION.SDK_INT >= 26) startForegroundService(Intent(this, javaClass))
-            else startService(Intent(this, javaClass))
+            startForegroundService(Intent(this, javaClass))
         }
 
         fun killProcesses(scope: CoroutineScope) {
@@ -269,7 +264,6 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                Firebase.analytics.logEvent("stop") { param(FirebaseAnalytics.Param.METHOD, tag) }
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -344,7 +338,6 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
 
             data.changeState(State.Connecting)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {

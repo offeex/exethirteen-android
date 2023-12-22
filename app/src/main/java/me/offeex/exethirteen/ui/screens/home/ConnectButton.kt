@@ -55,7 +55,7 @@ internal fun ConnectButton(isConnected: Boolean, onConnect: () -> Unit) {
             label = ""
         )
         Icon(
-            painterResource(id = R.drawable.poweroff),
+            painterResource(id = R.drawable.power),
             contentDescription = "",
             modifier = Modifier.size(sizeState.dp)
         )

@@ -18,38 +18,40 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package me.offeex.exethirteen.tasker
 
-import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import com.github.shadowsocks.Core.app
-import com.github.shadowsocks.preference.DataStore
+import android.os.Bundle
+import androidx.core.os.bundleOf
+import com.github.shadowsocks.database.ProfileManager
+import me.offeex.exethirteen.R
+import com.twofortyfouram.locale.api.Intent as ApiIntent
 
-class BootReceiver : BroadcastReceiver() {
+class Settings(bundle: Bundle?) {
     companion object {
-        private val componentName by lazy { ComponentName(app, BootReceiver::class.java) }
-        var enabled: Boolean
-            get() = app.packageManager.getComponentEnabledSetting(componentName) ==
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            set(value) = app.packageManager.setComponentEnabledSetting(componentName,
-                    if (value) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    else PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+        private const val KEY_SWITCH_ON = "switch_on"
+        private const val KEY_PROFILE_ID = "profile_id"
+
+        fun fromIntent(intent: Intent) = Settings(intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE))
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        if (!DataStore.persistAcrossReboot) {   // sanity check
-            enabled = false
-            return
-        }
-        val doStart = when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> !DataStore.directBootAware
-            Intent.ACTION_LOCKED_BOOT_COMPLETED -> DataStore.directBootAware
-            else -> DataStore.directBootAware && Core.user.isUserUnlocked
-        }
-        if (doStart) Core.startService()
+    var switchOn: Boolean = bundle?.getBoolean(KEY_SWITCH_ON, true) ?: true
+    var profileId: Long
+
+    init {
+        profileId = bundle?.getLong(KEY_PROFILE_ID, -1L) ?: -1L
+        if (profileId < 0) profileId = (bundle?.getInt(KEY_PROFILE_ID, -1) ?: -1).toLong()
+    }
+
+    fun toIntent(context: Context): Intent {
+        val profile = ProfileManager.getProfile(profileId)
+        return Intent()
+                .putExtra(ApiIntent.EXTRA_BUNDLE, bundleOf(Pair(KEY_SWITCH_ON, switchOn),
+                        Pair(KEY_PROFILE_ID, profileId)))
+                .putExtra(ApiIntent.EXTRA_STRING_BLURB,
+                        if (profile != null) context.getString(
+                                if (switchOn) R.string.start_service else R.string.stop_service, profile.formattedName)
+                        else context.getString(if (switchOn) R.string.start_service_default else R.string.stop))
     }
 }

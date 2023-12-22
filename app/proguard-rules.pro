@@ -14,7 +14,12 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
+-dontobfuscate
+
+-dontwarn lombok.Generated
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn sun.net.spi.nameservice.NameServiceDescriptor
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

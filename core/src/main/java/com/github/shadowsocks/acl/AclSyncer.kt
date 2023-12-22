@@ -37,7 +37,7 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
         private const val KEY_ROUTE = "route"
 
         fun schedule(route: String) {
-            if (Build.VERSION.SDK_INT >= 24 && !Core.user.isUserUnlocked) return    // work does not support this
+            if (!Core.user.isUserUnlocked) return    // work does not support this
             WorkManager.getInstance(app).enqueueUniqueWork(
                     route, ExistingWorkPolicy.REPLACE, OneTimeWorkRequestBuilder<AclSyncer>().run {
                 setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
