@@ -26,23 +26,18 @@ import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.os.Build
 import android.os.UserManager
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.core.os.persistableBundleOf
 import androidx.work.Configuration
-import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.subscription.SubscriptionService
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DeviceStorageApp
 import com.github.shadowsocks.utils.DirectBoot
@@ -141,8 +136,8 @@ object Core : Configuration.Provider {
                 NotificationChannel("service-proxy", app.getText(R.string.service_proxy),
                         NotificationManager.IMPORTANCE_LOW),
                 NotificationChannel("service-transproxy", app.getText(R.string.service_transproxy),
-                        NotificationManager.IMPORTANCE_LOW),
-                SubscriptionService.notificationChannel))
+                        NotificationManager.IMPORTANCE_LOW)
+        ))
         notification.deleteNotificationChannel("service-nat")   // NAT mode is gone for good
     }
 

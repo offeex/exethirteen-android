@@ -54,7 +54,6 @@ object ConnectionManager : ShadowsocksConnection.Callback,
 
     fun switchProfile(choice: ServerChoice) {
         _choice.value = choice
-        ProfileManager.createProfile(choice.profile)
         if (choice.profile.id in Core.activeProfileIds && DataStore.directBootAware) {
             DirectBoot.update()
         }
