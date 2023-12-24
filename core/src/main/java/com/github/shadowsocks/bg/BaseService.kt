@@ -24,12 +24,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
 import androidx.core.content.ContextCompat
-import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
@@ -38,7 +36,6 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.DnsResolverCompat
-import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
@@ -292,15 +289,12 @@ object BaseService {
                 data.changeState(State.Stopped, msg)
 
                 // stop the service if nothing has bound to it
-                if (restart) startRunner() else {
-                    BootReceiver.enabled = false
-                    stopSelf()
-                }
+                if (restart) startRunner() else stopSelf()
             }
         }
 
         fun persistStats() =
-                listOfNotNull(data.proxy, data.udpFallback).forEach { it.trafficMonitor?.persistStats(it.profile.id) }
+                listOfNotNull(data.proxy, data.udpFallback).forEach { it.trafficMonitor?.persistStats(it.profile) }
 
         suspend fun preInit() { }
         suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
@@ -309,25 +303,24 @@ object BaseService {
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
-            val expanded = Core.currentProfile
+            val profile = Core.currentProfile
+            Timber.d("Starting service with profile $profile")
             this as Context
-            if (expanded == null) {
+            if (profile == null) {
                 // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")
                 stopRunner(false, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
-            val (profile, fallback) = expanded
             try {
                 data.proxy = ProxyInstance(profile)
-                data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
+                data.udpFallback = ProxyInstance(profile)
             } catch (e: IllegalArgumentException) {
                 data.notification = createNotification("")
                 stopRunner(false, e.message)
                 return Service.START_NOT_STICKY
             }
 
-            BootReceiver.enabled = DataStore.persistAcrossReboot
             if (!data.closeReceiverRegistered) {
                 ContextCompat.registerReceiver(this, data.closeReceiver, IntentFilter().apply {
                     addAction(Action.RELOAD)

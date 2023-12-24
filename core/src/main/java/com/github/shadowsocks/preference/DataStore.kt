@@ -21,27 +21,12 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
-import androidx.preference.PreferenceDataStore
-import com.github.shadowsocks.BootReceiver
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.PublicDatabase
-import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
-import java.net.InetSocketAddress
 
-object DataStore : OnPreferenceDataStoreChangeListener {
+object DataStore {
     val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
-
-    init {
-        publicStore.registerChangeListener(this)
-    }
-
-    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
-        when (key) {
-            Key.id -> if (directBootAware) DirectBoot.update()
-        }
-    }
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
@@ -53,19 +38,11 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         } else parsePort(publicStore.getString(key), default + userIndex)
     }
 
-    var profileId: Long
-        get() = publicStore.getLong(Key.id) ?: 0
-        set(value) = publicStore.putLong(Key.id, value)
-    val persistAcrossReboot get() = publicStore.getBoolean(Key.persistAcrossReboot)
-            ?: BootReceiver.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
-    val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
-    val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
     val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
-    val proxyAddress get() = InetSocketAddress("127.0.0.1", portProxy)
     var portLocalDns: Int
         get() = getLocalPort(Key.portLocalDns, 5450)
         set(value) = publicStore.putString(Key.portLocalDns, value.toString())

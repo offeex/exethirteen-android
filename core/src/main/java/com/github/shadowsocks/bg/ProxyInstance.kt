@@ -137,7 +137,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
             thread.shutdown(scope)
-            persistStats(profile.id)    // Make sure update total traffic when stopping the runner
+            persistStats(profile)    // Make sure update total traffic when stopping the runner
         }
         trafficMonitor = null
         configFile?.delete()    // remove old config possibly in device storage

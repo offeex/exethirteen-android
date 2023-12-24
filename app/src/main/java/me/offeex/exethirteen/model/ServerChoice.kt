@@ -2,7 +2,6 @@ package me.offeex.exethirteen.model
 
 import androidx.annotation.DrawableRes
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
 import me.offeex.exethirteen.R
 
 enum class ServerChoice(

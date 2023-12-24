@@ -13,10 +13,8 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
-import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.StartService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,10 +52,7 @@ object ConnectionManager : ShadowsocksConnection.Callback,
 
     fun switchProfile(choice: ServerChoice) {
         _choice.value = choice
-        if (choice.profile.id in Core.activeProfileIds && DataStore.directBootAware) {
-            DirectBoot.update()
-        }
-        Core.switchProfile(choice.profile.id)
+        Core.currentProfile = choice.profile
     }
 
     fun bindService() = connection.connect(activity, this)

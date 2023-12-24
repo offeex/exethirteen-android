@@ -36,11 +36,9 @@ import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DeviceStorageApp
-import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
@@ -61,58 +59,62 @@ object Core : Configuration.Provider {
     val user by lazy { app.getSystemService<UserManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { DeviceStorageApp(app) }
-    val directBootSupported by lazy {
-        try {
-            app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
-                    DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
-        } catch (_: RuntimeException) {
-            false
+
+    var currentProfile: Profile? = null
+        set(value) {
+            Timber.d("Switching profile to $value")
+            field = value
         }
-    }
-
-    val activeProfileIds get() = ProfileManager.getProfile(DataStore.profileId).let {
-        if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
-    }
-    val currentProfile: ProfileManager.ExpandedProfile? get() {
-        if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
-        return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
-    }
-
-    fun switchProfile(id: Long): Profile {
-        val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
-        DataStore.profileId = result.id
-        return result
-    }
 
     fun init(app: Application, configureClass: KClass<out Any>) {
         this.app = app
         this.configureIntent = {
-            PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(
+                it,
+                0,
+                Intent(it, configureClass.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
         Timber.plant(object : Timber.DebugTree() {
-            override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+            override fun log(
+                priority: Int,
+                tag: String?,
+                message: String,
+                t: Throwable?
+            ) {
                 if (t == null) {
-                    if (priority != Log.DEBUG || BuildConfig.DEBUG) Log.println(priority, tag, message)
+                    if (priority != Log.DEBUG || BuildConfig.DEBUG) Log.println(
+                        priority,
+                        tag,
+                        message
+                    )
                 } else {
-                    if (priority >= Log.WARN || priority == Log.DEBUG) Log.println(priority, tag, message)
+                    if (priority >= Log.WARN || priority == Log.DEBUG) Log.println(
+                        priority,
+                        tag,
+                        message
+                    )
                 }
             }
         })
 
-        // handle data restored/crash
-        if (DataStore.directBootAware && user.isUserUnlocked) {
-            DirectBoot.flushTrafficStats()
-        }
-        if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != packageInfo.lastUpdateTime) {
+        if (DataStore.publicStore.getLong(
+                Key.assetUpdateTime,
+                -1
+            ) != packageInfo.lastUpdateTime
+        ) {
             val assetManager = app.assets
             try {
-                for (file in assetManager.list("acl")!!) assetManager.open("acl/$file").use { input ->
-                    File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
-                }
+                for (file in assetManager.list("acl")!!) assetManager.open("acl/$file")
+                    .use { input ->
+                        File(deviceStorage.noBackupFilesDir, file).outputStream()
+                            .use { output -> input.copyTo(output) }
+                    }
             } catch (e: IOException) {
                 Timber.w(e)
             }
@@ -129,23 +131,38 @@ object Core : Configuration.Provider {
     }.build()
 
     fun updateNotificationChannels() {
-        notification.createNotificationChannels(listOf(
-                NotificationChannel("service-vpn", app.getText(R.string.service_vpn),
-                        NotificationManager.IMPORTANCE_MIN
+        notification.createNotificationChannels(
+            listOf(
+                NotificationChannel(
+                    "service-vpn", app.getText(R.string.service_vpn),
+                    NotificationManager.IMPORTANCE_MIN
                 ),   // #1355
-                NotificationChannel("service-proxy", app.getText(R.string.service_proxy),
-                        NotificationManager.IMPORTANCE_LOW),
-                NotificationChannel("service-transproxy", app.getText(R.string.service_transproxy),
-                        NotificationManager.IMPORTANCE_LOW)
-        ))
+                NotificationChannel(
+                    "service-proxy", app.getText(R.string.service_proxy),
+                    NotificationManager.IMPORTANCE_LOW
+                ),
+                NotificationChannel(
+                    "service-transproxy", app.getText(R.string.service_transproxy),
+                    NotificationManager.IMPORTANCE_LOW
+                )
+            )
+        )
         notification.deleteNotificationChannel("service-nat")   // NAT mode is gone for good
     }
 
-    fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
-            PackageManager.GET_SIGNING_CERTIFICATES
+    fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(
+        packageName,
+        PackageManager.GET_SIGNING_CERTIFICATES
     )!!
 
-    fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
-    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
-    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE).setPackage(app.packageName))
+    fun startService() {
+        app.startForegroundService(Intent(app, ShadowsocksConnection.serviceClass))
+        Timber.d("Started service: $currentProfile")
+    }
+
+    fun reloadService() =
+        app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
+
+    fun stopService() =
+        app.sendBroadcast(Intent(Action.CLOSE).setPackage(app.packageName))
 }

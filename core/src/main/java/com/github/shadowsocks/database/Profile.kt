@@ -79,36 +79,6 @@ data class Profile(
         var dirty: Boolean = false
 ) : Parcelable, Serializable {
 
-    @androidx.room.Dao
-    interface Dao {
-        @Query("SELECT * FROM `Profile` WHERE `id` = :id")
-        operator fun get(id: Long): Profile?
-
-        @Query("SELECT * FROM `Profile` WHERE `Subscription` != 2 ORDER BY `userOrder`")
-        fun listActive(): List<Profile>
-
-        @Query("SELECT * FROM `Profile`")
-        fun listAll(): List<Profile>
-
-        @Query("SELECT MAX(`userOrder`) + 1 FROM `Profile`")
-        fun nextOrder(): Long?
-
-        @Query("SELECT 1 FROM `Profile` LIMIT 1")
-        fun isNotEmpty(): Boolean
-
-        @Insert
-        fun create(value: Profile): Long
-
-        @Update
-        fun update(value: Profile): Int
-
-        @Query("DELETE FROM `Profile` WHERE `id` = :id")
-        fun delete(id: Long): Int
-
-        @Query("DELETE FROM `Profile`")
-        fun deleteAll(): Int
-    }
-
     val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
     val formattedName get() = if (name.isNullOrEmpty()) formattedAddress else name!!
 
