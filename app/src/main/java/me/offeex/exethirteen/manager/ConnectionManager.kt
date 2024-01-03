@@ -3,31 +3,30 @@ package me.offeex.exethirteen.manager
 import android.os.RemoteException
 import android.text.format.Formatter
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceDataStore
-import com.github.shadowsocks.Core
-import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.aidl.ShadowsocksConnection
-import com.github.shadowsocks.aidl.TrafficStats
-import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.StartService
+import me.offeex.exethirteen.Core
+import me.offeex.exethirteen.aidl.ShadowsocksConnection
+import me.offeex.exethirteen.aidl.TrafficStats
+import me.offeex.exethirteen.bg.BaseService
+import me.offeex.exethirteen.preference.DataStore
+import me.offeex.exethirteen.preference.OnPreferenceDataStoreChangeListener
+import me.offeex.exethirteen.utils.Key
+import me.offeex.exethirteen.utils.StartService
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import me.offeex.exethirteen.aidl.IShadowsocksService
 import me.offeex.exethirteen.model.ServerChoice
 import timber.log.Timber
 
 object ConnectionManager : ShadowsocksConnection.Callback,
     OnPreferenceDataStoreChangeListener, Manager() {
-    private val _choice = mutableStateOf(ServerChoice.DE)
-    val choice: State<ServerChoice> get() = _choice
+    private var _choice by mutableStateOf(ServerChoice.UK)
+    val choice: ServerChoice get() = _choice
 
-    private val _connected = mutableStateOf(BaseService.State.Idle)
-    val connected: State<BaseService.State> get() = _connected
+    private var _connected by mutableStateOf(BaseService.State.Idle)
+    val connected: BaseService.State get() = _connected
 
     private val connection = ShadowsocksConnection(true)
 
@@ -47,11 +46,11 @@ object ConnectionManager : ShadowsocksConnection.Callback,
     private fun changeState(state: BaseService.State, msg: String? = null) {
         if (msg != null) Timber.tag("ChangeState").e("smthing fucked up: $msg")
         if (state != BaseService.State.Connected) resetStats()
-        _connected.value = state
+        _connected = state
     }
 
     fun switchProfile(choice: ServerChoice) {
-        _choice.value = choice
+        _choice = choice
         Core.currentProfile = choice.profile
     }
 
@@ -59,12 +58,14 @@ object ConnectionManager : ShadowsocksConnection.Callback,
     fun unbindService() = connection.disconnect(activity)
 
     fun toggle() =
-        if (connected.value.canStop) Core.stopService()
+        if (connected.canStop) Core.stopService()
         else serviceLauncher.launch(null)
 
     fun reconnect() {
-        if (connected.value.canStop) Core.stopService()
-        serviceLauncher.launch(null)
+        unbindService()
+        if (connected == BaseService.State.Stopped) serviceLauncher.launch(null)
+        else Core.reloadService()
+        bindService()
     }
 
 
@@ -75,7 +76,8 @@ object ConnectionManager : ShadowsocksConnection.Callback,
         bindService()
         DataStore.publicStore.registerChangeListener(this)
 
-        switchProfile(ServerChoice.DE)
+//        switchProfile(LatencyManager.lowestLatencyChoice)
+        switchProfile(ServerChoice.values()[0])
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
@@ -98,12 +100,12 @@ object ConnectionManager : ShadowsocksConnection.Callback,
         msg: String?
     ) = changeState(state, msg)
 
-    override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+    override fun trafficUpdated(profileId: String, stats: TrafficStats) {
         _uprate.value = Formatter.formatFileSize(activity, stats.txRate)
         _downrate.value = Formatter.formatFileSize(activity, stats.rxRate)
     }
 
-    override fun trafficPersisted(profileId: Long) = resetStats()
+    override fun trafficPersisted(profileId: String) = resetStats()
 
     override fun onServiceConnected(service: IShadowsocksService) =
         changeState(
@@ -118,7 +120,6 @@ object ConnectionManager : ShadowsocksConnection.Callback,
         changeState(BaseService.State.Idle)
 
     override fun onBinderDied() {
-        bindService()
         unbindService()
     }
 }

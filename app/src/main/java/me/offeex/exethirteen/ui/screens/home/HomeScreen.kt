@@ -5,6 +5,7 @@ import BandwidthDirection
 import CascadeButton
 import ConnectButton
 import ConnectedStatus
+import PremiumButton
 import ServerChoiceComposite
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -20,25 +21,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.shadowsocks.bg.BaseService
+import me.offeex.exethirteen.bg.BaseService
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import me.offeex.exethirteen.MainActivity
 import me.offeex.exethirteen.R
 import me.offeex.exethirteen.model.ServerChoice
-import me.offeex.exethirteen.ui.screens.ScreenUtils.screen
+import me.offeex.exethirteen.ui.screens.UIUtils.screen
 import me.offeex.exethirteen.ui.theme.PrimaryColor
 import me.offeex.exethirteen.ui.theme.SecondaryColor
 import me.offeex.exethirteen.ui.theme.TetriaryColor
 import me.offeex.exethirteen.manager.ConnectionManager
+import me.offeex.exethirteen.ui.screens.UIUtils
 
 @Composable
 @Destination
 @RootNavGraph(start = true)
 fun HomeScreen() {
-    val isConnected = ConnectionManager.connected.value == BaseService.State.Connected
+    val isConnected = ConnectionManager.connected == BaseService.State.Connected
 
-    Crossfade(targetState = isConnected, label = "", animationSpec = tween(700)) {
+    Crossfade(targetState = isConnected, animationSpec = tween(700)) {
         Box(Modifier.screen(if (it) R.drawable.bgactive else R.drawable.bg)) {
+            PremiumButton(UIUtils.goldenGradient) {
+                MainActivity.isPremiumOpen = true
+                MainActivity.isModalOpen = true
+            }
+
             ConnectButton(isConnected) { ConnectionManager.toggle() }
             ConnectedStatus(isConnected)
             Row(
@@ -74,7 +82,7 @@ fun HomeScreen() {
                         })
                 }
                 CascadeButton { isCascaded = !isCascaded }
-                val currentChoice = ConnectionManager.choice.value
+                val currentChoice = ConnectionManager.choice
                 LazyColumn(
                     modifier = Modifier
                         .background(PrimaryColor)

@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import me.offeex.exethirteen.R
 import me.offeex.exethirteen.ui.theme.TextColor
 
 @Composable
@@ -26,6 +28,6 @@ internal fun ConnectedStatus(isConnected: Boolean) {
                 .background(color = connectedColor, shape = CircleShape)
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "Connected", color = TextColor)
+        Text(text = stringResource(R.string.connected), color = TextColor)
     }
 }

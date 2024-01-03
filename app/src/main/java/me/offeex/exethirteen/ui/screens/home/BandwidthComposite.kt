@@ -10,15 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.offeex.exethirteen.R
-import timber.log.Timber
-import kotlin.math.roundToInt
 
 @Composable
 internal fun BandwidthComposite(direction: BandwidthDirection, value: String) {
-    val valueArr = value.split(" ")
+    val valueArr = try {
+        value.split(" ")
+    } catch (e: IndexOutOfBoundsException) { listOf(value) }
     val speed = valueArr[0].substringBefore(".")
     val unit = try {
         valueArr[1].uppercase()
@@ -38,7 +38,10 @@ internal fun BandwidthComposite(direction: BandwidthDirection, value: String) {
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
-                text = direction.name.lowercase().replaceFirstChar { it.uppercase() },
+                text = stringResource(when (direction) {
+                    BandwidthDirection.DOWNLOAD -> R.string.download
+                    BandwidthDirection.UPLOAD -> R.string.upload
+                }),
                 style = MaterialTheme.typography.bodyMedium
             )
             Row(
@@ -54,7 +57,7 @@ internal fun BandwidthComposite(direction: BandwidthDirection, value: String) {
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
-                    text = "$unit/s",
+                    text = stringResource(R.string.second, unit),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.alignByBaseline()
                 )

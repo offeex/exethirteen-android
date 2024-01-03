@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Exethirteen"
-include(":app", ":core")
+include(":app")

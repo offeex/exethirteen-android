@@ -1,11 +1,11 @@
 package me.offeex.exethirteen.manager
 
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 
 abstract class Manager {
-    internal lateinit var activity: ComponentActivity
+    internal lateinit var activity: AppCompatActivity
 
-    fun init(activity: ComponentActivity) {
+    fun init(activity: AppCompatActivity) {
         this.activity = activity
         init()
     }

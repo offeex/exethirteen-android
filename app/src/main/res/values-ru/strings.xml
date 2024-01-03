@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connected">Подключено</string>
+    <string name="download">Загрузка</string>
+    <string name="upload">Отправка</string>
+    <string name="more_locations">Больше локаций</string>
+    <string name="second">%1$s/сек</string>
+    <string name="pro_version">PRO версия</string>
+    <string name="more_speed">Высокая скорость</string>
+    <string name="premium_regions">Премиум регионы</string>
+    <string name="no_ads">Нет рекламы</string>
+    <string name="settings">Настройки</string>
+    <string name="ireland">Ирландия</string>
+    <string name="uk">Великобритания</string>
+    <string name="dublin">Дублин</string>
+    <string name="london">Лондон</string>
+    <string name="germany">Германия</string>
+    <string name="frankfurt">Франкфурт</string>
+    <string name="austria">Австрия</string>
+    <string name="vienna">Вена</string>
+    <string name="usa">США</string>
+    <string name="newyork">Нью-Йорк</string>
+</resources>

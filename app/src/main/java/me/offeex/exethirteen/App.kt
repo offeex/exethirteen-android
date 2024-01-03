@@ -2,7 +2,7 @@ package me.offeex.exethirteen
 
 import android.app.Application
 import androidx.work.Configuration
-import com.github.shadowsocks.Core
+import me.offeex.exethirteen.Core
 
 class App : Application(), Configuration.Provider by Core {
     override fun onCreate() {

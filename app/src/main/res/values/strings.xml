@@ -1,12 +1,33 @@
 <resources>
     <string name="app_name">Exethirteen</string>
 
-    <!-- tasker -->
-    <string name="toggle_service_state">Start the service</string>
-    <string name="start_service_default">Connect to the current server</string>
-    <string name="start_service">Connect to %s</string>
-    <string name="stop_service">Switch to %s</string>
-    <string name="profile_default">Use the current profile</string>
-    <string name="stop">Stop</string>
+    <!-- feature category -->
+    <string name="on">On</string>
+    <string name="off">Off</string>
 
+    <!-- notification category -->
+    <string name="service_vpn">VPN Service</string>
+    <string name="forward_success">ExeThirteen started.</string>
+    <string name="service_failed">Failed to connect the remote server</string>
+    <string name="stop">Stop</string>
+    <string name="connected">Connected</string>
+    <string name="download">Download</string>
+    <string name="upload">Upload</string>
+    <string name="more_locations">More locations</string>
+    <string name="second">%1$s/s</string>
+    <string name="pro_version">PRO version</string>
+    <string name="more_speed">More speed</string>
+    <string name="premium_regions">Premium regions</string>
+    <string name="no_ads">No ads</string>
+    <string name="settings">Settings</string>
+    <string name="ireland">Ireland</string>
+    <string name="uk">UK</string>
+    <string name="dublin">Dublin</string>
+    <string name="london">London</string>
+    <string name="germany">Germany</string>
+    <string name="frankfurt">Frankfurt</string>
+    <string name="austria">Austria</string>
+    <string name="vienna">Vienna</string>
+    <string name="usa">USA</string>
+    <string name="newyork">New York</string>
 </resources>

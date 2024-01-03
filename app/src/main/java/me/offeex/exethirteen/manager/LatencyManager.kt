@@ -2,7 +2,7 @@ package me.offeex.exethirteen.manager
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.lifecycleScope
-import com.github.shadowsocks.database.Profile
+import me.offeex.exethirteen.database.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -13,6 +13,8 @@ import kotlin.math.roundToInt
 
 object LatencyManager : Manager() {
     val latencies = mutableStateMapOf<ServerChoice, Int>()
+//    val lowestLatencyChoice: ServerChoice
+//        get() = latencies.minBy { it.value }.key
 
     private suspend fun updateLatencies() {
         ServerChoice.values().forEach {

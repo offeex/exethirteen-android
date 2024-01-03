@@ -11,8 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import me.offeex.exethirteen.manager.ConnectionManager
 import me.offeex.exethirteen.manager.LatencyManager
 import me.offeex.exethirteen.model.ServerChoice
 import me.offeex.exethirteen.ui.theme.PrimaryColor
@@ -40,7 +42,7 @@ internal fun ServerChoiceComposite(
             .clickable(
                 indication = null,
                 interactionSource = MutableInteractionSource(),
-                onClick = onSelect
+                onClick = if (choice != ConnectionManager.choice) onSelect else { {} }
             ),
     ) {
         Row(
@@ -52,8 +54,9 @@ internal fun ServerChoiceComposite(
                 contentDescription = null,
                 modifier = Modifier.size(40.dp)
             )
+            val context = LocalContext.current
             Text(
-                text = "${choice.country} | ${choice.city}",
+                text = "${choice.country(context)} | ${choice.city(context)}",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 12.dp)
             )
