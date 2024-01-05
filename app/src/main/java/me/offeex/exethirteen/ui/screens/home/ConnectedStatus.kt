@@ -12,14 +12,11 @@ import me.offeex.exethirteen.R
 import me.offeex.exethirteen.ui.theme.TextColor
 
 @Composable
-internal fun ConnectedStatus(isConnected: Boolean) {
+internal fun ConnectedStatus(isConnected: Boolean, modifier: Modifier) {
     Row(
+        modifier,
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-            .padding(top = 200.dp)
+        verticalAlignment = Alignment.CenterVertically
     ) {
         val connectedColor = if (isConnected) Color.Green else Color.Gray
         Box(

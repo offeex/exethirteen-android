@@ -7,12 +7,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import me.offeex.exethirteen.manager.ConnectionManager
 import me.offeex.exethirteen.manager.LatencyManager
@@ -42,7 +45,9 @@ internal fun ServerChoiceComposite(
             .clickable(
                 indication = null,
                 interactionSource = MutableInteractionSource(),
-                onClick = if (choice != ConnectionManager.choice) onSelect else { {} }
+                onClick = if (choice != ConnectionManager.choice) onSelect else {
+                    {}
+                }
             ),
     ) {
         Row(
@@ -67,7 +72,7 @@ internal fun ServerChoiceComposite(
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             Text(
-                text = LatencyManager.latencies[choice].toString(),
+                text = (LatencyManager.latencies[choice] ?: "NaN").toString(),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.height(20.dp)
             )

@@ -23,13 +23,8 @@ import androidx.compose.ui.unit.dp
 import me.offeex.exethirteen.R
 
 @Composable
-internal fun ConnectButton(isConnected: Boolean, onConnect: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
+internal fun ConnectButton(isConnected: Boolean, modifier: Modifier, onConnect: () -> Unit) {
+    Box(modifier, contentAlignment = Alignment.Center) {
         AnimatedVisibility(visible = isConnected, enter = scaleIn(), exit = scaleOut()) {
             Box(
                 modifier = Modifier

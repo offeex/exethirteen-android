@@ -1,4 +1,5 @@
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -17,9 +18,9 @@ import me.offeex.exethirteen.R
 @Composable
 internal fun BandwidthComposite(direction: BandwidthDirection, value: String) {
     val valueArr = try {
-        value.split(" ")
+        value.split("\\s".toRegex())
     } catch (e: IndexOutOfBoundsException) { listOf(value) }
-    val speed = valueArr[0].substringBefore(".")
+    val speed = valueArr[0]
     val unit = try {
         valueArr[1].uppercase()
     } catch (e: IndexOutOfBoundsException) {

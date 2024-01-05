@@ -45,8 +45,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 object PluginManager {
-    class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin),
-            BaseService.ExpectedException {
+    class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin) {
         override fun getLocalizedMessage() = "Unknown plugin $plugin"
     }
 
@@ -134,7 +133,7 @@ object PluginManager {
             val result = initNative(configuration)
             if (result != null) return result
         } catch (t: Throwable) {
-            if (throwable == null) throwable = t else Timber.w(t)
+            throwable = t
         }
 
         // add other plugin types here

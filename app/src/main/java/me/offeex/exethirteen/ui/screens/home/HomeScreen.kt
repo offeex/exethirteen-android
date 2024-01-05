@@ -17,6 +17,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +48,19 @@ fun HomeScreen() {
                 MainActivity.isModalOpen = true
             }
 
-            ConnectButton(isConnected) { ConnectionManager.toggle() }
-            ConnectedStatus(isConnected)
+            Box(
+                modifier = Modifier.align(Alignment.Center).offset(y = (-40).dp)
+            ) {
+                ConnectButton(isConnected, Modifier.align(Alignment.Center)) {
+                    ConnectionManager.toggle()
+                }
+                ConnectedStatus(
+                    isConnected, Modifier
+                        .align(Alignment.Center)
+                        .padding(top = 250.dp)
+                )
+            }
+
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
@@ -65,6 +77,7 @@ fun HomeScreen() {
                     ConnectionManager.upRate
                 )
             }
+
             Column(Modifier.align(Alignment.BottomCenter)) {
                 var isCascaded by remember { mutableStateOf(false) }
                 val fillerAlpha by animateFloatAsState(
@@ -89,13 +102,14 @@ fun HomeScreen() {
                         .animateContentSize()
                 ) {
                     if (isCascaded) {
+                        item { Divider(color = PrimaryColor, thickness = 2.dp) }
                         items(ServerChoice.values().toList()) { choice ->
                             val color =
                                 if (currentChoice == choice) TetriaryColor
                                 else SecondaryColor
                             ServerChoiceComposite(choice, color) {
+                                ConnectionManager.disconnect()
                                 ConnectionManager.switchProfile(choice)
-                                ConnectionManager.reconnect()
                             }
                             Spacer(modifier = Modifier.padding(top = 1.dp, bottom = 1.dp))
                         }

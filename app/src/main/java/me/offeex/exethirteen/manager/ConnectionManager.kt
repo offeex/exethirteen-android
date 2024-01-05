@@ -57,6 +57,11 @@ object ConnectionManager : ShadowsocksConnection.Callback,
     fun bindService() = connection.connect(activity, this)
     fun unbindService() = connection.disconnect(activity)
 
+    fun disconnect() {
+        if (connected.canStop)
+            Core.stopService()
+    }
+
     fun toggle() =
         if (connected.canStop) Core.stopService()
         else serviceLauncher.launch(null)
@@ -100,8 +105,8 @@ object ConnectionManager : ShadowsocksConnection.Callback,
     ) = changeState(state, msg)
 
     override fun trafficUpdated(profileId: String, stats: TrafficStats) {
-        _uprate.value = Formatter.formatFileSize(activity, stats.txRate)
-        _downrate.value = Formatter.formatFileSize(activity, stats.rxRate)
+        _uprate.value = kurivo(stats.txRate)
+        _downrate.value = kurivo(stats.rxRate)
     }
 
     override fun trafficPersisted(profileId: String) = resetStats()
@@ -121,4 +126,8 @@ object ConnectionManager : ShadowsocksConnection.Callback,
     override fun onBinderDied() {
         unbindService()
     }
+
+    private fun kurivo(rate: Long) = Formatter
+        .formatShortFileSize(activity, rate)
+        .replace("[^(a-zA-Z0-9а-яА-Я|\\s)]*".toRegex(), "")
 }

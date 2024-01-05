@@ -96,11 +96,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             })
 
             // local DNS proxy
-            if (dnsRelay) try {
-                URI("dns://${profile.remoteDns}")
-            } catch (e: URISyntaxException) {
-                throw BaseService.ExpectedExceptionWrapper(e)
-            }.let { dns ->
+            if (dnsRelay) URI("dns://${profile.remoteDns}").let { dns ->
                 put(JSONObject().apply {
                     put("local_address", DataStore.listenAddress)
                     put("local_port", DataStore.portLocalDns)
