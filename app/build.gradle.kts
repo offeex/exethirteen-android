@@ -113,7 +113,7 @@ cargo {
     }
 }
 
-tasks.whenTaskAdded {
+tasks.configureEach {
     when (name) {
         "mergeDebugJniLibFolders", "mergeReleaseJniLibFolders" -> dependsOn("cargoBuild")
     }

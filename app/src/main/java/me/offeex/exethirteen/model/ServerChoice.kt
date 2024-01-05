@@ -32,7 +32,7 @@ enum class ServerChoice(
     DE(R.drawable.de, res(R.string.germany), res(R.string.frankfurt), zatichka),
     IE(R.drawable.ie, res(R.string.ireland), res(R.string.dublin), zatichka2),
     UK(R.drawable.uk, res(R.string.uk), res(R.string.london), zatichka),
-    AT(R.drawable.at, res(R.string.austria), res(R.string.vienna), zatichka),
+//    AT(R.drawable.at, res(R.string.austria), res(R.string.vienna), zatichka),
     US(R.drawable.us, res(R.string.usa), res(R.string.newyork), zatichka),
     ;
 

@@ -63,8 +63,7 @@ object ConnectionManager : ShadowsocksConnection.Callback,
 
     fun reconnect() {
         unbindService()
-        if (connected == BaseService.State.Stopped) serviceLauncher.launch(null)
-        else Core.reloadService()
+        Core.reloadService()
         bindService()
     }
 

@@ -80,7 +80,7 @@ object BaseService {
         val closeReceiver = broadcastReceiver { _, intent ->
             when (intent.action) {
                 Intent.ACTION_SHUTDOWN -> service.persistStats()
-                Action.RELOAD -> service.forceLoad()
+                Action.RELOAD -> service.forceLoad(intent)
                 else -> service.stopRunner()
             }
         }
@@ -217,11 +217,11 @@ object BaseService {
 
         fun onBind(intent: Intent): IBinder? = if (intent.action == Action.SERVICE) data.binder else null
 
-        fun forceLoad() {
+        fun forceLoad(intent: Intent) {
             val s = data.state
             when {
                 s == State.Stopped -> {
-                    Timber.d("plis don't let dis shit happen")
+                    Timber.d("plis don't let dis shit happen: " + data.proxy?.profile?.name)
                     startRunner(data.proxy!!.profile)
                 }
                 s.canStop -> stopRunner(true)
@@ -300,7 +300,7 @@ object BaseService {
                 data.changeState(State.Stopped, msg)
 
                 // stop the service if nothing has bound to it
-                Timber.d("Restart nigga 3")
+                Timber.d("Restart nigga 3: " + data.proxy!!.profile.name)
                 if (restart) startRunner(data.proxy!!.profile) else stopSelf()
             }
         }

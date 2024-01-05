@@ -149,7 +149,6 @@ object Core : Configuration.Provider {
 
     fun reloadService() {
         app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
-        Timber.d("Restart nigga 0")
     }
 
     fun stopService() =
